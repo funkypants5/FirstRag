@@ -5,7 +5,8 @@ from langchain_google_genai import GoogleGenerativeAIEmbeddings
 from langchain_core.vectorstores import InMemoryVectorStore
 import bs4
 from langchain import hub
-from langchain_community.document_loaders import WebBaseLoader
+from langchain_community.document_loaders import PyPDFLoader
+import glob
 from langchain_core.documents import Document
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langgraph.graph import START, StateGraph
@@ -26,11 +27,13 @@ vector_store = InMemoryVectorStore(embeddings)
 
 
 
-# Load and chunk contents of the blog. Learn how to load PDF and relevent data instead
-loader = WebBaseLoader(
-    web_paths=("https://www.straitstimes.com/sport/december-madness-for-singapore-womens-floorball-team-with-world-cship-and-sea-games",),
-)
-docs = loader.load()
+# Load multiple PDFs from the data folder
+pdf_files = glob.glob("data/*.pdf")
+
+docs = []
+for pdf_path in pdf_files:
+    loader = PyPDFLoader(pdf_path)
+    docs.extend(loader.load())   # extend with all pages from this PDF
 
 text_splitter = RecursiveCharacterTextSplitter(
     chunk_size=1000,  # chunk size (characters)
@@ -78,7 +81,6 @@ graph_builder = StateGraph(State).add_sequence([retrieve, generate])
 graph_builder.add_edge(START, "retrieve")
 graph = graph_builder.compile()
 
-result = graph.invoke({"question": "Who won floorball Asia-Oceania Floorball Confederation ?"})
-
+result = graph.invoke({"question": "Where should I go if i want to eat the best chicken rice in singapore. Give me 1 answer only"})
 print(f"Context: {result['context']}\n\n")
 print(f"Answer: {result['answer']}")
