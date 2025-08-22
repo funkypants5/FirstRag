@@ -17,6 +17,7 @@ os.environ["LANGSMITH_TRACING"] = "true"
 if not os.environ.get("GOOGLE_API_KEY"):
     raise ValueError("GOOGLE_API_KEY not set. Please run `setx GOOGLE_API_KEY \"your-key\"` in PowerShell.")
 
+
 # Initialize Gemini model
 llm = init_chat_model("gemini-1.5-flash", model_provider="google_genai")
 
